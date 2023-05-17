@@ -1,0 +1,14 @@
+{
+  "name": "dreamteamdb",
+  "version": "1.0.0",
+  "description": "Final Project for CS493 - Cloud Application Development",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
