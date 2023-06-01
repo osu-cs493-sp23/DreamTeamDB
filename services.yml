@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  mongo-server:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    networks:
+      - mongodb-net
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+
+  redis-server:
+    image: redis:latest
+    ports:
+      - 6379:6379
+    networks:
+      - redis-net
+
+networks:
+  mongodb-net:
+    driver: bridge
+
+  redis-net:
+    driver: bridge
