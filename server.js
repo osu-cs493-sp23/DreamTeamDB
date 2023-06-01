@@ -17,6 +17,14 @@ const app = express();
 const port = process.env.PORT || 5000;
 const env = process.env.NODE_ENV || "development";
 
+const mongoPort = process.env.MONGO_PORT || 27017
+const mongoAuthDbName = process.env.MONGO_DBNAME || "tarpaulin"
+const mongoUser = process.env.MONGO_USER || "tarpaulin"
+const mongoPassword = process.env.MONGO_PASS || "pass"
+const mongoHost = process.env.MONGO_HOST || "localhost"
+
+const mongoUrl = `mongodb://${mongoUser}:${mongoPassword}@${mongoHost}:${mongoPort}/${mongoAuthDbName}`;
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -30,9 +38,16 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
+app.use('*', function (req, res, next) {
+  res.status(404).send({
+      err: "This URL was not recognized: " + req.originalUrl
+  })
+})
+
+
 // Database Connection
 mongoose
-  .connect(process.env.MONGO_URI, {
+  .connect(mongoUrl, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -40,10 +55,10 @@ mongoose
     console.log(`[⚡️ DATABASE] Connected to MongoDB`);
   })
   .catch((err) => {
-    console.log(`[⚡️ DATABASE] Error: ${err}`);
+    console.log(`[❌ DATABASE] Error: ${err}`);
   })
   .finally(() => {
-    console.log(`[⚡️ SERVER] MongoURI: ${process.env.MONGO_URI}`);
+    console.log(`[⚡️ SERVER] MongoURI: ${mongoUrl}`);
 
     // Start Server
     app.listen(port, () => {

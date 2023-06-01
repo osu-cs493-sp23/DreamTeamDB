@@ -4,6 +4,14 @@ import { Router } from "express";
 
 const router = Router();
 
+import mongoose from "mongoose";
+
+import { assignmentSchema, submissionSchema}  from "../../lib/validation/schemas.js"
+import Assignment from "../../models/Assignment.js";
+
+import requireAuthentication from "../../lib/auth.js";
+import requireValidation from "../../lib/validation/validation.js";
+
 /**
  * @route     POST /api/assignments
  * @desc      Create a new assignment
@@ -16,21 +24,55 @@ const router = Router();
  * @returns   {object}       - error message
  * @returns   {int}         - status code 201, 400, 403
  */
-router.post("/", (req, res, next) => {
-  res.send("Create a new assignment");
+router.post("/", requireValidation(assignmentSchema), requireAuthentication, (req, res, next) => {
+  const assignment = new Assignment(req.body)
+
+  // TODO: validate that coursId belongs to a real course
+  // TODO: Authenticate 
+
+  assignment.save().then(async (insertedAssignment) => {
+    return res.status(201).json({
+      id: insertedAssignment._id,
+      links: {
+        business: `/api/assignments/${insertedAssignment._id}`
+      },
+    });
+  }).catch(function (e) {
+    res.status(400).json({
+      error: e
+    });
+  })
+
 });
 
 /**
-      @route  GET /api/assignments/{id}
-      @desc   Fetch data about a specific assignment
-      @param  {ObjectId} id - ObjectId of the assignment
-      @access All
-      @return {object}    - assignment data
-      @return {object}    - error message
-      @return {int}       - status code 200, 404
+* @route  GET /api/assignments/{id}
+* @desc   Fetch data about a specific assignment
+* @param  {ObjectId} id - ObjectId of the assignment
+* @access All
+* @return {object}    - assignment data
+* @return {object}    - error message
+* @return {int}       - status code 200, 404
 */
-router.get("/:id", (req, res, next) => {
-  res.send(`Assignment ${req.params.id}`);
+router.get("/:id", requireAuthentication, (req, res, next) => {
+  const assignmentID = new mongoose.Types.ObjectId(req.params.id)
+
+  Assignment.findById(assignmentID).then(async (foundAssignment) => {
+    if (foundAssignment) {
+      const assignment = await Assignment.find({ _id: assignmentID })
+
+      return res.status(200).json({
+        assignment: assignment
+      });
+    } else {
+      next()
+    }
+  }).catch(function (e) {
+    console.log(e)
+    res.status(400).json({
+      error: e
+    });
+  })
 });
 
 /**
@@ -46,8 +88,27 @@ router.get("/:id", (req, res, next) => {
  * @returns   {int}       - status code 200, 400, 403, 404
  * @returns   {object}       - error message
  */
-router.patch("/:id", (req, res, next) => {
-  res.send(`Update assignment ${req.params.id}`);
+router.patch("/:id", requireValidation(assignmentSchema), requireAuthentication, (req, res, next) => {
+  const assignmentId = new mongoose.Types.ObjectId(req.params.id)
+
+  Assignment.findByIdAndUpdate(assignmentId, req.body, { new: true }).then(
+    (updatedAssignment) => {
+      if (updatedAssignment) {
+        res.status(200).json({
+          id: updatedAssignment._id,
+          links: {
+            assignment: `/api/assignment/${updatedAssignment._id}`,
+          },
+        });
+      } else {
+        next();
+      }
+    }
+  ).catch(function (e) {
+    res.status(400).json({
+      error: e
+    })
+  });
 });
 
 /**
@@ -58,8 +119,22 @@ router.patch("/:id", (req, res, next) => {
  * @returns   {int}       - status code 204, 403, 404
  * @returns   {object}       - error message
  */
-router.delete("/:id", (req, res, next) => {
-  res.send(`Delete assignment ${req.params.id}`);
+router.delete("/:id", requireAuthentication, (req, res, next) => {
+  const assignmentID = new mongoose.Types.ObjectId(req.params.id)
+
+  Assignment.deleteOne({ _id: assignmentID }).then(
+    (deletedAssignment) => {
+      if (deletedAssignment.deletedCount > 0) {
+        res.status(204).end()
+      } else {
+        res.status(400).end()
+      }
+    }
+  ).catch(function (e) {
+    res.status(400).json({
+      error: e
+    })
+  });
 });
 
 /**
@@ -74,7 +149,7 @@ router.delete("/:id", (req, res, next) => {
  * @returns   {object}       - error message
  * @paginated
  */
-router.get("/:id/submissions", (req, res, next) => {
+router.get("/:id/submissions", requireValidation(submissionSchema), requireAuthentication, (req, res, next) => {
   res.send(`Get submissions for assignment ${req.params.id}`);
 });
 
@@ -93,7 +168,7 @@ router.get("/:id/submissions", (req, res, next) => {
  * @returns   {int}       - status code 201, 400, 403, 404
  * @returns   {object}       - error message
  */
-router.post("/:id/submissions", (req, res, next) => {
+router.post("/:id/submissions", requireValidation(submissionSchema), requireAuthentication, (req, res, next) => {
       res.send(`Create a new submission for assignment ${req.params.id}`);
 });
 

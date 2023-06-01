@@ -45,7 +45,23 @@ Before getting started with developing or testing Tarpaulin, you'll need to inst
     cd DreamTeamDB && npm install
     ```
 
-3. Start the server (dev)
+4. Run MongoDB container:
+
+  ```sh
+  make docker-start
+  make mongo-run
+  ```
+
+5. Set up Mongo DB:
+
+  ```sh
+  make mongo-attach
+  mongosh --username root --password pass --authenticationDatabase admin
+  use tarpaulin
+  db.createUser({ user: "tarpaulin", pwd: "pass", roles: [ { role: "readWrite", db: "tarpaulin" } ] });
+  ```
+
+6. Start the server (dev)
 
     ```sh
     npm run dev 
