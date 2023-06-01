@@ -70,4 +70,4 @@ Before getting started with developing or testing Tarpaulin, you'll need to inst
 
 ## Entity Relationship Diagram
 
-[![ERD](./entities.png)
+![ERD](./entities.png)
