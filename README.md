@@ -44,14 +44,20 @@ Before getting started with developing or testing Tarpaulin, you'll need to inst
     ```sh
     cd DreamTeamDB && npm install
     ```
+3. Start the dockcer containers 
 
-3. Start the server (dev)
+  ```sh
+  docker-compose -f services.yml up -d --force-recreate 
+  ```
+  
+  > --force-recreate flag is optional
+
+4. Start the server (dev)
+
 
     ```sh
     npm run dev 
     ```
-
-  **Note:** If you're using the Docker Compose YAML, you can start the services with `docker-compose up`.
 
 - [OpenAPI Spec](./openapi.yaml)
 - [Swagger.io](https://editor.swagger.io/)
@@ -69,5 +75,6 @@ Before getting started with developing or testing Tarpaulin, you'll need to inst
 - [Docker Compose](https://docs.docker.com/compose/)
 
 ## Entity Relationship Diagram
+
 
 ![ERD](./entities.png)

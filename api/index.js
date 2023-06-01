@@ -15,4 +15,10 @@ router.use("/assignments", assignments);
 router.use("/courses", courses);
 router.use("/users", users);
 
+router.use('*', function (req, res, next) {
+  res.status(404).send({
+      err: "This URL was not recognized: " + req.originalUrl
+  })
+})
+
 export default router;
