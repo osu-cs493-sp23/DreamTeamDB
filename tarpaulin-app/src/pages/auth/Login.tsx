@@ -9,11 +9,12 @@ import {
       useColorModeValue,
       Text,
 } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User } from '../../types';
 import axios, { AxiosResponse } from 'axios';
 import { IoChevronBackCircleSharp } from 'react-icons/io5';
+import { UserContext } from '../../context/UserContext';
 
 const Login = () => {
       const navigate = useNavigate();
@@ -24,6 +25,7 @@ const Login = () => {
       });
       const [loading, setLoading] = useState(false);
       const [message, setMessage] = useState('');
+      const { setUser: setter } = useContext(UserContext);
 
       const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
             e.preventDefault();
@@ -35,6 +37,9 @@ const Login = () => {
                               setMessage('Login successful');
                               setTimeout(() => {
                                     localStorage.setItem('token', response.data.token);
+                                    localStorage.setItem('id', response.data.id);
+                                    localStorage.setItem('role', response.data.role);
+                                    setter?.(response.data);
                                     navigate('/dashboard');
                               }, 2000);
                         }, 2000);
