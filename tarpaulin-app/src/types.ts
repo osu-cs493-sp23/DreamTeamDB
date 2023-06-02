@@ -1,5 +1,5 @@
 export interface Assignment {
-  courseId: string;
+  courseId: string | number;
   title: string;
   points: number;
   due: Date;
@@ -14,14 +14,16 @@ export interface Course {
 }
 
 export interface Submission {
-  assignmentId: string;
-  studentId: string;
+  assignmentId: string | number;
+  studentId: string | number;
   timestamp: Date;
   grade?: number;
   file?: string;
 }
 
 export interface User {
+  token?: string;
+  id?: string | number;
   name?: string;
   email: string;
   password: string;
