@@ -5,16 +5,14 @@
 
 import mongoose from "mongoose";
 
-import userSchema from "./User";
-import assignmentSchema from "./Assignment";
-import courseSchema from "./Course";
-import errorSchema from "./Error";
-import submissonSchema from "./Submission";
+import userSchema from "./User.js";
+import assignmentSchema from "./Assignment.js";
+import courseSchema from "./Course.js";
+import errorSchema from "./Error.js";
+import submissonSchema from "./Submission.js";
 
-const User = mongoose.model("User", userSchema);
-const Course = mongoose.model("Course", courseSchema);
-const Assignment = mongoose.model("Assignment", assignmentSchema);
-const Submission = mongoose.model("Submission", submissonSchema);
-const Error = mongoose.model("Error", errorSchema);
-
-export { User, Course, Assignment, Submission, Error };
+export const User = mongoose.model("User", userSchema);
+export const Course = mongoose.model("Course", courseSchema);
+export const Assignment = mongoose.model("Assignment", assignmentSchema);
+export const Submission = mongoose.model("Submission", submissonSchema);
+export const Error = mongoose.model("Error", errorSchema);

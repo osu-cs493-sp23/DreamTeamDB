@@ -44,30 +44,20 @@ Before getting started with developing or testing Tarpaulin, you'll need to inst
     ```sh
     cd DreamTeamDB && npm install
     ```
-
-4. Run MongoDB container:
-
-  ```sh
-  make docker-start
-  make mongo-run
-  ```
-
-5. Set up Mongo DB:
+3. Start the dockcer containers 
 
   ```sh
-  make mongo-attach
-  mongosh --username root --password pass --authenticationDatabase admin
-  use tarpaulin
-  db.createUser({ user: "tarpaulin", pwd: "pass", roles: [ { role: "readWrite", db: "tarpaulin" } ] });
+  docker-compose -f services.yml up -d --force-recreate 
   ```
+  
+  > --force-recreate flag is optional
 
-6. Start the server (dev)
+4. Start the server (dev)
+
 
     ```sh
     npm run dev 
     ```
-
-  **Note:** If you're using the Docker Compose YAML, you can start the services with `docker-compose up`.
 
 - [OpenAPI Spec](./openapi.yaml)
 - [Swagger.io](https://editor.swagger.io/)
@@ -86,4 +76,5 @@ Before getting started with developing or testing Tarpaulin, you'll need to inst
 
 ## Entity Relationship Diagram
 
-[![ERD](./entities.png)
+
+![ERD](./entities.png)
