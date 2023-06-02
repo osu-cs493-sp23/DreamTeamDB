@@ -77,7 +77,6 @@ const Login = () => {
                         boxShadow="lg"
                         minW={{ base: '90%', md: '468px' }}
                   >
-
                         <Heading textAlign={"center"} mb={6} fontWeight={400} fontSize={{ base: '2xl', md: '4xl' }}> Login </Heading>
                         {message ? (
                               <Text color={message === 'Login successful' ? 'green.400' : 'red.400'} textAlign={"center"} mb={6} fontWeight={400}>
