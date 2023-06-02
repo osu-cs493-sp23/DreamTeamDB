@@ -93,7 +93,7 @@ router.post("/login", async (req, res, next) => {
 
     const token = generateAuthToken(user);
 
-    res.status(200).json({ token });
+    res.status(200).json({ token , id: user._id, role: user.role });
   } catch (e) {
     next(e);
   }
@@ -129,15 +129,12 @@ router.get(
 
     try {
       if (role === "student") {
-        const courses = await getCoursesByStudent(req.params.id);
+        // const courses = await getCoursesByStudent(req.params.id);
         const student = await User.findById(req.params.id);
-
         res.status(200).json(student);
       } else if (role === "instructor") {
-        const courses = await getCoursesByInstructor(req.params.id);
+        // const courses = await getCoursesByInstructor(req.params.id);
         const instructor = await User.findById(req.params.id);
-
-        instructor.courses = courses;
         res.status(200).json(instructor);
       } else {
         const user = await User.findById(req.params.id);
