@@ -42,6 +42,13 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
+app.use('*', function (req, res, next) {
+  res.status(404).send({
+      err: "This URL was not recognized: " + req.originalUrl
+  })
+})
+
+
 // Database Connection
 mongoose
   .connect(mongoConnectionString, {
@@ -52,7 +59,7 @@ mongoose
     console.log(`[⚡️ DATABASE] Connected to MongoDB`);
   })
   .catch((err) => {
-    console.log(`[⚡️ DATABASE] Error: ${err}`);
+    console.log(`[❌ DATABASE] Error: ${err}`);
   })
   .finally(() => {
     // Start Server
