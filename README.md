@@ -44,7 +44,7 @@ Before getting started with developing or testing Tarpaulin, you'll need to inst
     ```sh
     cd DreamTeamDB && npm install
     ```
-3. Start the dockcer containers 
+3. Start the docker containers 
 
   ```sh
   docker-compose -f services.yml up -d --force-recreate 
@@ -53,7 +53,6 @@ Before getting started with developing or testing Tarpaulin, you'll need to inst
   > --force-recreate flag is optional
 
 4. Start the server (dev)
-
 
     ```sh
     npm run dev 
