@@ -9,8 +9,6 @@ import mongoose from "mongoose";
 import { assignmentSchema, submissionSchema}  from "../../lib/validation/schemas.js"
 import Assignment from "../../models/Assignment.js";
 
-import requireAuthentication from "../../lib/auth.js";
-import requireValidation from "../../lib/validation/validation.js";
 
 /**
  * @route     POST /api/assignments
@@ -24,7 +22,7 @@ import requireValidation from "../../lib/validation/validation.js";
  * @returns   {object}       - error message
  * @returns   {int}         - status code 201, 400, 403
  */
-router.post("/", requireValidation(assignmentSchema), requireAuthentication, (req, res, next) => {
+router.post("/", (req, res, next) => {
   const assignment = new Assignment(req.body)
 
   // TODO: validate that coursId belongs to a real course
@@ -54,7 +52,7 @@ router.post("/", requireValidation(assignmentSchema), requireAuthentication, (re
 * @return {object}    - error message
 * @return {int}       - status code 200, 404
 */
-router.get("/:id", requireAuthentication, (req, res, next) => {
+router.get("/:id",  (req, res, next) => {
   const assignmentID = new mongoose.Types.ObjectId(req.params.id)
 
   Assignment.findById(assignmentID).then(async (foundAssignment) => {
@@ -88,7 +86,7 @@ router.get("/:id", requireAuthentication, (req, res, next) => {
  * @returns   {int}       - status code 200, 400, 403, 404
  * @returns   {object}       - error message
  */
-router.patch("/:id", requireValidation(assignmentSchema), requireAuthentication, (req, res, next) => {
+router.patch("/:id", (req, res, next) => {
   const assignmentId = new mongoose.Types.ObjectId(req.params.id)
 
   Assignment.findByIdAndUpdate(assignmentId, req.body, { new: true }).then(
@@ -119,7 +117,7 @@ router.patch("/:id", requireValidation(assignmentSchema), requireAuthentication,
  * @returns   {int}       - status code 204, 403, 404
  * @returns   {object}       - error message
  */
-router.delete("/:id", requireAuthentication, (req, res, next) => {
+router.delete("/:id", (req, res, next) => {
   const assignmentID = new mongoose.Types.ObjectId(req.params.id)
 
   Assignment.deleteOne({ _id: assignmentID }).then(
@@ -149,7 +147,7 @@ router.delete("/:id", requireAuthentication, (req, res, next) => {
  * @returns   {object}       - error message
  * @paginated
  */
-router.get("/:id/submissions", requireValidation(submissionSchema), requireAuthentication, (req, res, next) => {
+router.get("/:id/submissions", (req, res, next) => {
   res.send(`Get submissions for assignment ${req.params.id}`);
 });
 
@@ -168,7 +166,7 @@ router.get("/:id/submissions", requireValidation(submissionSchema), requireAuthe
  * @returns   {int}       - status code 201, 400, 403, 404
  * @returns   {object}       - error message
  */
-router.post("/:id/submissions", requireValidation(submissionSchema), requireAuthentication, (req, res, next) => {
+router.post("/:id/submissions", (req, res, next) => {
       res.send(`Create a new submission for assignment ${req.params.id}`);
 });
 
