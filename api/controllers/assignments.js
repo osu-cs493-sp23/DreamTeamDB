@@ -4,12 +4,11 @@ import { Router } from "express";
 
 const router = Router();
 
-import mongoose from "mongoose";
-
-import { assignmentSchema, submissionSchema}  from "../../lib/validation/schemas.js"
-import Assignment from "../../models/Assignment.js";
-
-import requireValidation from "../../lib/validation/validation.js";
+import { Assignment, Course } from "../../models/index.js";
+import { validateAssignment } from "../../models/Assignment.js";
+import {
+  validateRole,
+} from "../../lib/auth.js";
 
 /**
  * @route     POST /api/assignments
@@ -23,26 +22,39 @@ import requireValidation from "../../lib/validation/validation.js";
  * @returns   {object}       - error message
  * @returns   {int}         - status code 201, 400, 403
  */
-router.post("/", requireValidation(assignmentSchema), (req, res, next) => {
-  const assignment = new Assignment(req.body)
+router.post("/",
+  validateRole(["admin", "instructor"]),
+  async (req, res, next) => {
 
-  // TODO: validate that coursId belongs to a real course
-  // TODO: Authenticate 
+    const { error } = validateAssignment(req.body)
 
-  assignment.save().then(async (insertedAssignment) => {
-    return res.status(201).json({
-      id: insertedAssignment._id,
-      links: {
-        business: `/api/assignments/${insertedAssignment._id}`
-      },
-    });
-  }).catch(function (e) {
-    res.status(400).json({
-      error: e
-    });
-  })
+    if (error) {
+      return res.status(400).json({ message: formatError(error) });
+    }
 
-});
+    const validCourse = await Course.findById(req.body.courseId)
+
+    if (!validCourse) {
+      return res.status(400).json({ message: "Invalid CourseID." });
+    }
+
+    try {
+      const assignment = new Assignment(
+        req.body
+      );
+
+      await assignment.save();
+
+      res.status(201).json({
+        id: assignment._id,
+        links: {
+          "Assignment": '/api/assignments/${assignment._id}'
+        }
+      });
+    } catch (e) {
+      next(e);
+    }
+  });
 
 /**
 * @route  GET /api/assignments/{id}
@@ -53,25 +65,20 @@ router.post("/", requireValidation(assignmentSchema), (req, res, next) => {
 * @return {object}    - error message
 * @return {int}       - status code 200, 404
 */
-router.get("/:id", (req, res, next) => {
-  const assignmentID = new mongoose.Types.ObjectId(req.params.id)
+router.get("/:id", async (req, res, next) => {
+  try {
+    const assignment = await Assignment.findById(req.params.id)
 
-  Assignment.findById(assignmentID).then(async (foundAssignment) => {
-    if (foundAssignment) {
-      const assignment = await Assignment.find({ _id: assignmentID })
-
-      return res.status(200).json({
-        assignment: assignment
+    if (assignment) {
+      res.status(201).json({
+        assignment
       });
     } else {
       next()
     }
-  }).catch(function (e) {
-    console.log(e)
-    res.status(400).json({
-      error: e
-    });
-  })
+  } catch (e) {
+    next(e);
+  }
 });
 
 /**
@@ -87,28 +94,39 @@ router.get("/:id", (req, res, next) => {
  * @returns   {int}       - status code 200, 400, 403, 404
  * @returns   {object}       - error message
  */
-router.patch("/:id", requireValidation(assignmentSchema), (req, res, next) => {
-  const assignmentId = new mongoose.Types.ObjectId(req.params.id)
+router.patch("/:id",
+  validateRole(["admin", "instructor"]),
+  async (req, res, next) => {
 
-  Assignment.findByIdAndUpdate(assignmentId, req.body, { new: true }).then(
-    (updatedAssignment) => {
+    const { error } = validateAssignment(req.body)
+
+    if (error) {
+      return res.status(400).json({ message: formatError(error) });
+    }
+
+    const validCourse = await Course.findById(req.body.courseId)
+
+    if (!validCourse) {
+      return res.status(400).json({ message: "Invalid CourseID." });
+    }
+
+    try {
+      const updatedAssignment = await Assignment.findByIdAndUpdate(req.params.id, req.body, { new: true })
+
       if (updatedAssignment) {
         res.status(200).json({
           id: updatedAssignment._id,
           links: {
-            assignment: `/api/assignment/${updatedAssignment._id}`,
-          },
-        });
+            "assignment": `/api/assignment/${updatedAssignment._id}`
+          }
+        })
       } else {
-        next();
+        next()
       }
+    } catch (e) {
+      next(e);
     }
-  ).catch(function (e) {
-    res.status(400).json({
-      error: e
-    })
   });
-});
 
 /**
  * @route     DELETE /api/assignments/{id}
@@ -118,23 +136,22 @@ router.patch("/:id", requireValidation(assignmentSchema), (req, res, next) => {
  * @returns   {int}       - status code 204, 403, 404
  * @returns   {object}       - error message
  */
-router.delete("/:id", (req, res, next) => {
-  const assignmentID = new mongoose.Types.ObjectId(req.params.id)
+router.delete("/:id",
+  validateRole(["admin", "instructor"]),
+  async (req, res, next) => {
 
-  Assignment.deleteOne({ _id: assignmentID }).then(
-    (deletedAssignment) => {
+    try {
+      const deletedAssignment = await Assignment.deleteOne({ _id: req.params.id })
+
       if (deletedAssignment.deletedCount > 0) {
         res.status(204).end()
       } else {
         res.status(400).end()
       }
+    } catch (e) {
+      next(e)
     }
-  ).catch(function (e) {
-    res.status(400).json({
-      error: e
-    })
   });
-});
 
 /**
  * @route     GET /api/assignments/{id}/submissions
@@ -148,7 +165,7 @@ router.delete("/:id", (req, res, next) => {
  * @returns   {object}       - error message
  * @paginated
  */
-router.get("/:id/submissions", requireValidation(submissionSchema), (req, res, next) => {
+router.get("/:id/submissions", (req, res, next) => {
   res.send(`Get submissions for assignment ${req.params.id}`);
 });
 
@@ -167,8 +184,8 @@ router.get("/:id/submissions", requireValidation(submissionSchema), (req, res, n
  * @returns   {int}       - status code 201, 400, 403, 404
  * @returns   {object}       - error message
  */
-router.post("/:id/submissions", requireValidation(submissionSchema), (req, res, next) => {
-      res.send(`Create a new submission for assignment ${req.params.id}`);
+router.post("/:id/submissions", (req, res, next) => {
+  res.send(`Create a new submission for assignment ${req.params.id}`);
 });
 
 export default router;
