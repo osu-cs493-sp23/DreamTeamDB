@@ -27,5 +27,8 @@
     "rate-limit-redis": "^2.1.0",
     "redis": "^4.6.6"
   },
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "@types/rate-limit-redis": "^3.0.0"
+  }
 }
