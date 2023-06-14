@@ -3,14 +3,16 @@ export interface Assignment {
   title: string;
   points: number;
   due: Date;
+  _id: string;
 }
 
-export interface Course {
+export type Course = {
   subject: string;
   number: string;
   title: string;
   term: string;
   instructorId: string;
+  _id: string;
 }
 
 export interface Submission {

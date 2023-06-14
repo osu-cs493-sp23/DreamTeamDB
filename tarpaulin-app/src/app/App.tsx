@@ -24,6 +24,7 @@ function App() {
             <Route path="/dashboard/courses" element={<Content />} />
             <Route path="/dashboard/submissions" element={<Content  />} />
             <Route path="/dashboard/timeline" element={<Content />} />
+            <Route path="/dashboard/admin" element={<Content />} />
           </Route>
         </>
       </Routes>

@@ -1,34 +1,37 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import React, { useContext, useEffect } from "react";
-import { UserContext } from "../../context/UserContext";
-import { FaBell } from 'react-icons/fa';
-import { AiOutlineTeam, AiOutlineHome } from 'react-icons/ai';
-import { BsFolder2, BsCalendarCheck } from 'react-icons/bs';
-import { FiMenu } from 'react-icons/fi';
-import { FcReading } from 'react-icons/fc';
-import Course from "../../components/cards/Course";
-import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import {
       Avatar,
       Box,
-      Flex,
-      Icon,
-      Text,
-      Heading,
       BoxProps,
       Drawer,
       DrawerContent,
-      IconButton,
-      useDisclosure,
       DrawerOverlay,
-      useColorModeValue,
+      Flex,
+      Heading,
+      Icon,
+      IconButton,
       SimpleGrid,
-      Button,
-      CloseButton
+      Text,
+      useColorMode,
+      useColorModeValue,
+      useDisclosure
 } from '@chakra-ui/react';
+import axios from 'axios';
+import React, { useContext } from "react";
+import { AiOutlineHome, AiOutlineTeam } from 'react-icons/ai';
+import { BsCalendarCheck, BsFolder2 } from 'react-icons/bs';
+import { FaBell } from 'react-icons/fa';
+import { FcReading } from 'react-icons/fc';
+import { FiMenu } from 'react-icons/fi';
+import { MdAdminPanelSettings } from "react-icons/md";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { AssignmentCard } from "../../components/cards/Assignment";
-import useData from "../../hooks/useData";
-import { useColorMode } from '@chakra-ui/react';
+import CourseCard from '../../components/cards/Course';
+import { UserContext } from "../../context/UserContext";
+import useCourses from '../../hooks/useCourses';
+import { Course } from '../../types';
+import AddCourse from '../admin/AddCourse';
+import UpdateCourse from '../admin/UpdateCourse';
 
 interface ContentProps {
       role?: string;
@@ -39,66 +42,72 @@ export const Content: React.FC<ContentProps> = ({ role }) => {
       const location = useLocation();
       const path = location.pathname.split('/dashboard')[1];
       const { colorMode } = useColorMode()
-      const [coursesList, setCoursesList] = React.useState<any[]>([
-            {
-                  subject: "CS",
-                  number: "101",
-                  title: "Intro to Computer Science",
-                  term: "Fall 2020",
-                  instructorId: "1"
-            },
-            {
-                  subject: "MATH",
-                  number: "202",
-                  title: "Linear Algebra",
-                  term: "Fall 2020",
-                  instructorId: "2"
-            },
-            {
-                  subject: "ENG",
-                  number: "101",
-                  title: "English Composition",
-                  term: "Fall 2020",
-                  instructorId: "3"
-            },
-      ]);
+      // const [coursesList, setCoursesList] = React.useState<any[]>([]);
+
+      const { courses, setCourses } = useCourses(1, "", "", "");
+
+      // React.useEffect(() => {
+      //       console.log(courses)
+      //       setCoursesList(courses);
+      // }, [courses])
+
+      const deleteCourse = async (e: React.FormEvent<HTMLButtonElement>) => {
+            const token = localStorage.getItem('token')
+            e.preventDefault()
+            try {
+                  const response = await axios.delete(`http://localhost:8000/api/courses/${e.currentTarget.value}`, {
+                        headers: {
+                              Authorization: `Bearer ${token}`
+                        }
+                  })
+
+                  if (response.status === 204) {
+                        console.log('Course Deleted!')
+                        setCourses(courses.filter((course: Course) => course._id !== e.currentTarget.value))
+                  } else {
+                        console.log('Something Went Wrong Deleting Course!')
+                  }
+
+            } catch (error) {
+                  console.error(error)
+            }
+      }
+
 
       if (path === '/submissions') {
             return (
                   <>
                         <Heading fontWeight={400} fontSize={{ base: '2xl', md: '4xl' }}>{role && role.charAt(0).toUpperCase() + role.slice(1)} Assignments</Heading>
-                        <AssignmentCard assignment={{
-                              courseId: '1',
-                              title: 'Assignment 1',
-                              points: 100,
-                              due: new Date(),
-                        }} />
+                        {/* <AssignmentCard/> */}
                   </>
             )
       } else if (path === '/courses') {
+            const role = localStorage.getItem('role');
             return (
                   <>
                         <Heading fontWeight={400} fontSize={{ base: '2xl', md: '4xl' }}>{role && role.charAt(0).toUpperCase() + role.slice(1)} Dashboard</Heading>
                         <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={10} mt={10}>
-                              {/* <Course title="Cloud Application Development" subject="CS" number={493} term="Spring 2022" />
-                              <Course title="Parallel Programming" subject="CS" number={475} term="Spring 2022" />
-                              <Course title="Software Engineering II" subject="CS" number={362} term="Spring 2022" />
-                              <Course title="Open Source Software" subject="CS" number={464} term="Spring 2022" />
-                              <Course title="Operating Systems II" subject="CS" number={444} term="Spring 2022" /> */}
-                              {/* Add course button */}
-                              {role === "admin" && <Button onClick={() => console.log("add")}>Add Course</Button>}
-                              {coursesList.map((course, index) => {
+                              {courses?.map((course: Course, index) => {
                                     return (
-                                          <div key={index}>
-
-                                                <CloseButton position="absolute" right="8px" top="8px" onClick={() => console.log("delete")} key={course.number} />
-                                                <Course key={index} title={course.title} subject={course.subject} number={parseInt(course.number)} term={course.term} />
-                                          </div>
+                                          <Box key={index} zIndex={1}>
+                                                <CourseCard key={index} title={course.title} subject={course.subject} number={course.number} term={course.term} instructorId={course.instructorId} _id={course._id} deleteCourse={deleteCourse} />
+                                          </Box>
                                     )
                               })}
                         </SimpleGrid>
                   </>
             )
+      } else if (path === '/admin') {
+            return (
+                  <>
+                        <Heading fontWeight={400} fontSize={{ base: '2xl', md: '4xl' }}>{role && role.charAt(0).toUpperCase() + role.slice(1)} Dashboard</Heading>
+                        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={10} mt={10}>
+                              <AddCourse />
+                              <UpdateCourse />
+                        </SimpleGrid>
+                  </>
+            )
+
       } else if (path === '/timeline') {
             return (
                   <>
@@ -111,11 +120,13 @@ export const Content: React.FC<ContentProps> = ({ role }) => {
                   <>
                         <Heading fontWeight={400} fontSize={{ base: '2xl', md: '4xl' }}>{role && role.charAt(0).toUpperCase() + role.slice(1)} Dashboard</Heading>
                         <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={10} mt={10}>
-                              <Course title="Cloud Application Development" subject="CS" number={493} term="Spring 2022" />
-                              <Course title="Parallel Programming" subject="CS" number={475} term="Spring 2022" />
-                              <Course title="Software Engineering II" subject="CS" number={362} term="Spring 2022" />
-                              <Course title="Open Source Software" subject="CS" number={464} term="Spring 2022" />
-                              <Course title="Operating Systems II" subject="CS" number={444} term="Spring 2022" />
+                              {courses?.map((course: Course, index) => {
+                                    return (
+                                          <Box key={index} zIndex={1}>
+                                                <CourseCard key={index} title={course.title} subject={course.subject} number={course.number} term={course.term} instructorId={course.instructorId} _id={course._id} deleteCourse={deleteCourse} />
+                                          </Box>
+                                    )
+                              })}
                         </SimpleGrid>
                   </>
             )
@@ -226,6 +237,7 @@ const SidebarContent = ({ ...props }: BoxProps) => {
                         <NavItem onClick={() => navigate('/dashboard/courses')} icon={AiOutlineTeam}>Course List</NavItem>
                         <NavItem onClick={() => navigate('/dashboard/submissions')} icon={BsFolder2}>Submissions</NavItem>
                         <NavItem onClick={() => navigate('/dashboard/timeline')} icon={BsCalendarCheck}>Timeline View</NavItem>
+                        {user?.role === 'admin' && <NavItem onClick={() => navigate('/dashboard/admin')} icon={MdAdminPanelSettings}>Admin</NavItem>}
                         <NavItem onClick={handleLogout} icon={AiOutlineHome}>Logout</NavItem>
                   </Flex>
             </Box>

@@ -1,150 +1,130 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import * as React from 'react';
-import { Assignment } from '../../types';
-import { useNavigate } from 'react-router-dom';
 import {
-      chakra,
-      Container,
-      HStack,
-      VStack,
-      Text,
-      Tag,
-      Link,
-      Image,
-      useColorModeValue,
-      SimpleGrid,
       Button,
-      MenuButton,
-      Menu,
-      MenuDivider,
-      MenuList,
-      MenuItem,
+      Center,
+      Container,
+      Flex,
+      HStack,
+      Input,
       Modal,
-      ModalOverlay,
-      ModalContent,
-      ModalHeader,
-      ModalCloseButton,
       ModalBody,
+      ModalCloseButton,
+      ModalContent,
       ModalFooter,
-      useDisclosure,
+      ModalHeader,
+      ModalOverlay,
+      NumberDecrementStepper,
+      NumberIncrementStepper,
+      NumberInput,
       NumberInputField,
       NumberInputStepper,
-      NumberIncrementStepper,
-      NumberDecrementStepper,
-      Center,
-      IconButton,
-      Input,
-      NumberInput,
-      Flex,
+      Select,
+      SimpleGrid,
+      VStack,
+      useColorModeValue,
+      useDisclosure
 } from '@chakra-ui/react';
-import { UserContext } from '../../context/UserContext';
+import axios from 'axios';
+import * as React from 'react';
 import { AiOutlinePlusSquare } from 'react-icons/ai';
+import { UserContext } from '../../context/UserContext';
+import useCourses from '../../hooks/useCourses';
+import { Assignment, Course } from '../../types';
 
 
 interface AssignmentCardProps {
-      assignment: Assignment;
+      assignment?: Assignment;
 }
 
 
-const assignmentList: Assignment[] = [
-      {
-            courseId: '1',
-            title: 'Assignment 1',
-            points: 100,
-            due: new Date(Date.now() - 43200000),
-      },
-      {
-            courseId: '2',
-            title: 'Assignment 2',
-            points: 100,
-            due: new Date(Date.now() + 43200000),
-      },
-      {
-            courseId: '3',
-            title: 'Assignment 3',
-            points: 100,
-            due: new Date(Date.now() - 86400000),
-      },
-      {
-            courseId: '4',
-            title: 'Assignment 4',
-            points: 100,
-            due: new Date(Date.now() - 172800000),
-      },
-      {
-            courseId: '5',
-            title: 'Assignment 5',
-            points: 100,
-            due: new Date(Date.now() - 259200000),
-      },
-      {
-            courseId: '6',
-            title: 'Assignment 1',
-            points: 100,
-            due: new Date(),
-      },
-      {
-            courseId: '7',
-            title: 'Assignment 2',
-            points: 100,
-            due: new Date(Date.now() + 43200000),
-      },
-      {
-            courseId: '8',
-            title: 'Assignment 3',
-            points: 100,
-            due: new Date(Date.now() + 86400000),
-      },
-      {
-            courseId: '9',
-            title: 'Assignment 4',
-            points: 100,
-            due: new Date(Date.now() + 172800000),
-      },
-      {
-            courseId: '10',
-            title: 'Assignment 5',
-            points: 100,
-            due: new Date(Date.now() + 259200000),
-      },
-];
-
-assignmentList.sort(() => Math.random() - 0.5);
 
 interface CreateAssignmentModalProps {
-      isOpen: boolean;
-      onClose: () => void;
+      isOpen2: boolean;
+      onClose2: () => void;
+      onOpen2?: () => void;
 }
 
-const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, onClose }) => {
-      // CourseID will need to either be passed in, selected, or from url
+export const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen2, onClose2, onOpen2 }) => {
+      const { courses } = useCourses(1, "", "", "");
+      const [title, setTitle] = React.useState<string>('');
+      const [points, setPoints] = React.useState<number>(0);
+      const [due, setDue] = React.useState<Date>(new Date());
+      const [course, setCourse] = React.useState<string>('');
+
+
+      const handleSubmit = async (e: React.FormEvent<HTMLButtonElement>) => {
+            const token = localStorage.getItem('token');
+            e.preventDefault();
+
+            try {
+                  const response = await axios.post(`http://localhost:8000/api/assignments`, {
+                        title,
+                        points,
+                        due,
+                        courseId: course
+                  }, {
+                        headers: {
+                              Authorization: `Bearer ${token}`
+                        }
+                  });
+
+                  if (response.status === 201) {
+                        console.log('Assignment Created!');
+                        onClose2();
+                  } else {
+                        console.log('Assignment Not Created!');
+                  }
+
+            } catch (error) {
+                  console.log('Error Creating Assignment!');
+            }
+
+      };
+
+
       return (
             <>
                   <Center>
-                        <IconButton aria-label="Create Assignment" icon={<AiOutlinePlusSquare />} size={'lg'} />
+                        <Button px="4"
+                              py="2"
+                              h="auto"
+                              size="sm"
+                              fontSize="sm"
+                              fontWeight="bold"
+                              w={{ base: 'full', sm: 'auto' }} onClick={onOpen2} colorScheme='blue' leftIcon={<AiOutlinePlusSquare />}>
+                              Create Assignment
+                        </Button>
                   </Center>
-                  <Modal blockScrollOnMount={true} isOpen={isOpen} onClose={onClose}>
+                  <Modal blockScrollOnMount={true} isOpen={isOpen2} onClose={onClose2}>
                         <ModalOverlay />
                         <ModalContent>
                               <ModalHeader>Create A New Assignment</ModalHeader>
                               <ModalCloseButton />
                               <ModalBody my={4} as='form'>
                                     <Flex direction='column' justifyContent='space-between' gap={6}>
-                                          <Input placeholder="Assignment Title" type='text' />
-                                          <NumberInput placeholder='Points' min={0} max={100} defaultValue={0} precision={0}>
+                                          <Input placeholder="Assignment Title" type='text' onChange={(e) => setTitle(e.target.value)} />
+                                          <NumberInput placeholder='Points' min={0} max={100} defaultValue={0} precision={0} onChange={(e) => setPoints(parseInt(e))}>
                                                 <NumberInputField />
                                                 <NumberInputStepper>
                                                       <NumberIncrementStepper />
                                                       <NumberDecrementStepper />
                                                 </NumberInputStepper>
                                           </NumberInput>
-                                          <Input placeholder="Due Date" type='datetime-local' />
+                                          <Input placeholder="Due Date" type='datetime-local' onChange={(e) => setDue(new Date(e.target.value))} />
                                     </Flex>
+
+                                    <Select placeholder="Select Course" onChange={(e) => setCourse(e.target.value)}>
+                                          {courses.map((course: Course) => (
+                                                <option key={course._id} value={course._id} >
+                                                      {course.title}
+                                                </option>
+                                          ))}
+                                    </Select>
                               </ModalBody>
 
                               <ModalFooter>
-                                    <Button variant='outline' onClick={onClose}>Close</Button>
-                                    <Button colorScheme='blue' ml={3}>
+                                    <Button variant='outline' onClick={onClose2}>Close</Button>
+                                    <Button colorScheme='blue' ml={3} onClick={handleSubmit}>
                                           Create
                                     </Button>
                               </ModalFooter>
@@ -156,11 +136,10 @@ const CreateAssignmentModal: React.FC<CreateAssignmentModalProps> = ({ isOpen, o
 
 
 export const AssignmentCard: React.FC<AssignmentCardProps> = () => {
-      const textColor = useColorModeValue('gray.500', 'gray.200');
-      const navigate = useNavigate();
       const { user } = React.useContext(UserContext);
-      const role = user?.role;
       const { isOpen, onOpen, onClose } = useDisclosure();
+      const role = user?.role;
+
       return (
             <>
                   <Container p={4} maxW="container.xl">
@@ -184,93 +163,13 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = () => {
                                                 cursor="pointer"
                                                 _hover={{ shadow: 'lg', bg: useColorModeValue('gray.50', 'gray.900') }}
                                           >
-                                                <CreateAssignmentModal isOpen={isOpen} onClose={onClose} />
+                                                {/* <CreateAssignmentModal isOpen={isOpen} onClose={onClose} /> */}
                                           </HStack>
                                     ) : (
-                                          <></>
-                                    )}
-                                    {assignmentList.map(({ courseId, title, points, due }) => (
-                                          <chakra.div key={courseId}>
-                                                <HStack
-                                                      p={4}
-                                                      bg={useColorModeValue('white', 'gray.800')}
-                                                      rounded="xl"
-                                                      borderWidth="1px"
-                                                      borderColor={useColorModeValue('gray.100', 'gray.700')}
-                                                      w="100%"
-                                                      h="100%"
-                                                      textAlign="left"
-                                                      align="start"
-                                                      spacing={4}
-                                                      cursor="pointer"
-                                                      _hover={{ shadow: 'lg' }}
-                                                >
-                                                      <Image
-                                                            src={"https://avatars.githubusercontent.com/u/46255836?v=4"}
-                                                            alt="avatar"
-                                                            fallbackSrc="https://via.placeholder.com/150"
-                                                            rounded="full"
-                                                            w={12}
-                                                            h={12}
-                                                            bg="gray.100"
-                                                            border="1px solid transparent"
+                                          <>
 
-                                                      />
-                                                      <VStack align="start" justify="flex-start">
-                                                            <HStack>
-                                                                  <Text
-                                                                        as={Link}
-                                                                        href="#"
-                                                                        fontWeight="bold"
-                                                                        fontSize="md"
-                                                                        noOfLines={1}
-                                                                        onClick={(e) => {
-                                                                              e.preventDefault();
-                                                                              navigate(`/courses/${courseId}`);
-                                                                        }}
-                                                                        isExternal
-                                                                  >
-                                                                        {title}
-                                                                  </Text>
-                                                                  <Tag
-                                                                        size="sm"
-                                                                        ml={2}
-                                                                        colorScheme={due < new Date() ? 'red' : 'green'}
-                                                                        rounded="full"
-                                                                        variant="solid"
-                                                                  >
-                                                                        Due {due.toLocaleDateString()}
-                                                                  </Tag>
-                                                            </HStack>
-                                                            <Text fontSize="sm" color={textColor}>
-                                                                  {points} points
-                                                            </Text>
-                                                            <VStack mt={4} spacing={2} alignItems="flex-start">
-                                                                  <Menu isLazy>
-                                                                        <MenuButton>Assignment Actions</MenuButton>
-                                                                        <MenuList>
-                                                                              {(role === 'instructor' || role === 'admin') ? (
-                                                                                    <>
-                                                                                          <MenuItem>Edit</MenuItem>
-                                                                                          <MenuDivider />
-                                                                                          <MenuItem>Delete</MenuItem>
-                                                                                          <MenuDivider />
-                                                                                          <MenuItem>View Submissions</MenuItem>
-                                                                                    </>
-                                                                              ) : (
-                                                                                    <>
-                                                                                          <MenuItem>View</MenuItem>
-                                                                                          <MenuDivider />
-                                                                                          <MenuItem>Submit</MenuItem>
-                                                                                    </>
-                                                                              )}
-                                                                        </MenuList>
-                                                                  </Menu>
-                                                            </VStack>
-                                                      </VStack>
-                                                </HStack>
-                                          </chakra.div>
-                                    ))}
+                                          </>
+                                    )}
                               </SimpleGrid>
                         </VStack>
                   </Container >
