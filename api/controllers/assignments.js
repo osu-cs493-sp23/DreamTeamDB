@@ -7,7 +7,7 @@ const router = Router();
 import mongoose from "mongoose";
 
 import { assignmentSchema, submissionSchema}  from "../../lib/validation/schemas.js"
-import Assignment from "../../models/Assignment.js";
+import { Assignment, Course } from "../../models/index.js";
 
 
 /**
@@ -22,11 +22,26 @@ import Assignment from "../../models/Assignment.js";
  * @returns   {object}       - error message
  * @returns   {int}         - status code 201, 400, 403
  */
-router.post("/", (req, res, next) => {
-  const assignment = new Assignment(req.body)
+router.post("/" ,async (req, res, next) => {
+  const { title, courseId, points, due } = req.body
+  const assignment = new Assignment({
+    title: title,
+    courseId: new mongoose.Types.ObjectId(courseId),
+    points: points,
+    due: due
+  })
 
   // TODO: validate that coursId belongs to a real course
   // TODO: Authenticate 
+  const course = await Course.findById(new mongoose.Types.ObjectId(courseId))
+  if (!course) {
+    return res.status(400).json({
+      error: "Course does not exist"
+    })
+  }
+
+  course.assignments.push(assignment._id)
+  await course.save()
 
   assignment.save().then(async (insertedAssignment) => {
     return res.status(201).json({
