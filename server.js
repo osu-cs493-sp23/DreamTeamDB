@@ -44,7 +44,7 @@ app.get("/", (req, res) => {
 
 app.use('*', function (req, res, next) {
   res.status(404).send({
-      err: "This URL was not recognized: " + req.originalUrl
+    err: "This URL was not recognized: " + req.originalUrl
   })
 })
 
@@ -68,9 +68,13 @@ mongoose
     });
   });
 
+/*
+ * This route will catch any errors thrown from our API endpoints and return
+ * a response with a 500 status to the client.
+ */
 app.use("*", function (err, req, res, next) {
   if (err) {
-    console.error(err.stack);
+    console.error(err);
     res.status(500).send({
       err: err,
     });

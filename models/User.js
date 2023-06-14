@@ -30,7 +30,7 @@ export const validateUser = (user) => {
     role: joi.string().valid('admin', 'instructor', 'student'),
   });
 
-  return schema.validate(user); 
+  return schema.validate(user);
 };
 
 export const validateLogin = (user) => {
@@ -43,3 +43,25 @@ export const validateLogin = (user) => {
 };
 
 export default userSchema;
+
+const User = mongoose.model('User', userSchema);
+
+// Get user by ID
+export async function getUserById(id) {
+  try {
+    return await User.findById(id);
+  } catch (err) {
+    console.error("  -- error:", err);
+    return null;
+  }
+}
+
+//  Get all students array of objectids
+export async function getStudents() {
+  try {
+    return await User.find({ role: "student" });
+  } catch (err) {
+    console.error("  -- error:", err);
+    return null;
+  }
+}
