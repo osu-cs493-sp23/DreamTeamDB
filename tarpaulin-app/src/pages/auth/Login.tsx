@@ -40,7 +40,7 @@ const Login = () => {
                                     localStorage.setItem('id', response.data.id);
                                     localStorage.setItem('role', response.data.role);
                                     setter?.(response.data);
-                                    navigate('/dashboard');
+                                    navigate('/dashboard/courses');
                               }, 2000);
                         }, 2000);
                   } else {

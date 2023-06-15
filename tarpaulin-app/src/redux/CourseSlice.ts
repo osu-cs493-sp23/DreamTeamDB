@@ -80,6 +80,99 @@ export const removeCourse = createAsyncThunk(
       }
 )
 
+interface GetAssignments {
+      courseId: string,
+}
+
+export const getAssignments = createAsyncThunk(
+      'course/getAssignments',
+      async ({ courseId }: GetAssignments) => {
+            const token = localStorage.getItem('token');
+            try {
+                  const response = await axios.get(`http://localhost:8000/api/courses/${courseId}/assignments`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                  });
+                  return response.data.assignments;
+            } catch (error) {
+                  console.log(error);
+                  return false;
+            }
+      }
+)
+
+interface RemoveAssignment {
+      assignmentId: string,
+}
+
+export const removeAssignment = createAsyncThunk(
+      'course/removeAssignment',
+      async ({ assignmentId }: RemoveAssignment) => {
+            const token = localStorage.getItem('token');
+            try {
+                  const response = await axios.delete(`http://localhost:8000/api/assignments/${assignmentId}`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                  });
+                  if (response.status === 204) {
+                        return assignmentId;
+                  } else {
+                        return false;
+                  }
+            } catch (error) {
+                  console.log(error);
+                  return false;
+            }
+      }
+)
+
+interface CreateAssignment {
+      courseId: string,
+      title: string,
+      points: number,
+      due: Date,
+}
+
+export const createAssignment = createAsyncThunk(
+      'course/createAssignment',
+      async ({ courseId, title, points, due }: CreateAssignment) => {
+            const token = localStorage.getItem('token');
+            try {
+                  const response = await axios.post(`http://localhost:8000/api/assignments`, {
+                        courseId,
+                        title,
+                        points,
+                        due,
+                  }, {
+                        headers: { Authorization: `Bearer ${token}` },
+                  });
+                  return response.data.assignment;
+            } catch (error) {
+                  console.log(error);
+                  return false;
+            }
+      }
+)
+
+interface GetStudentsInCourse {
+      courseId: string,
+}
+
+export const getStudentsInCourse = createAsyncThunk(
+      'course/getStudentsInCourse',
+      async ({ courseId }: GetStudentsInCourse) => {
+            const token = localStorage.getItem('token');
+            try {
+                  const response = await axios.get(`http://localhost:8000/api/courses/${courseId}/students`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                  });
+                  return response.data.students;
+            } catch (error) {
+                  console.log(error);
+                  return false;
+            }
+      }
+)
+
+
 export const courseSlice = createSlice({
       name: 'course',
       initialState,
@@ -96,18 +189,73 @@ export const courseSlice = createSlice({
             builder.addCase(fetchCourses.fulfilled, (state, action) => {
                   state.courses = action.payload;
             })
-            builder.addCase(fetchCourses.rejected, (state) => {
-                  state.courses = [];
-            });
-            builder.addCase(fetchCourses.pending, (state) => {
-                  state.courses = [];
-            });
             builder.addCase(addNewCourse.fulfilled, (state, action) => {
                   state.courses.push(action.payload);
             });
             builder.addCase(removeCourse.fulfilled, (state, action) => {
                   if (action.payload) {
                         state.courses = state.courses.filter(course => course._id !== action.payload);
+                  }
+            });
+            builder.addCase(getAssignments.fulfilled, (state, action) => {
+                  const course = state.courses.find(course => course._id === action.meta.arg.courseId);
+                  if (course) {
+                        state.courses = state.courses.map(course => {
+                              if (course._id === action.meta.arg.courseId) {
+                                    return { ...course, assignments: action.payload }
+                              } else {
+                                    return course;
+                              }
+                        }
+                        );
+                  }
+            });
+            builder.addCase(removeAssignment.fulfilled, (state, action) => {
+                  if (action.payload) {
+                        state.courses = state.courses.map(course => {
+                              if (course.assignments) {
+                                    return {
+                                          ...course,
+                                          assignments: course.assignments.filter(assignment => assignment._id !== action.payload)
+                                    }
+                              } else {
+                                    return course;
+                              }
+                        });
+                  }
+            });
+            builder.addCase(createAssignment.fulfilled, (state, action) => {
+                  if (action.payload) {
+                        state.courses = state.courses.map(course => {
+                              if (course._id === action.payload.courseId) {
+                                    if (course.assignments) {
+                                          return {
+                                                ...course,
+                                                assignments: [...course.assignments, action.payload]
+                                          }
+                                    } else {
+                                          return {
+                                                ...course,
+                                                assignments: [action.payload]
+                                          }
+                                    }
+                              } else {
+                                    return course;
+                              }
+                        });
+                  }
+            });
+            builder.addCase(getStudentsInCourse.fulfilled, (state, action) => {
+                  const course = state.courses.find(course => course._id === action.meta.arg.courseId);
+                  if (course) {
+                        state.courses = state.courses.map(course => {
+                              if (course._id === action.meta.arg.courseId) {
+                                    return { ...course, students: action.payload }
+                              } else {
+                                    return course;
+                              }
+                        }
+                        );
                   }
             });
       }
@@ -122,5 +270,15 @@ export const selectCourses = (state: { course: CourseState }) => state.course.co
 export const selectCourseById = (state: { course: CourseState }, courseId: string) => {
       return state.course.courses.find(course => course._id === courseId);
 }
+
+export const selectCourseAssignments = (state: { course: CourseState }, courseId: string) => {
+      return state.course.courses.find(course => course._id === courseId)?.assignments;
+}
+
+export const selectStudentsInCourse = (state: { course: CourseState }, courseId: string) => {
+      return state.course.courses.find(course => course._id === courseId)?.students;
+}
+
+
 
 export default courseSlice.reducer

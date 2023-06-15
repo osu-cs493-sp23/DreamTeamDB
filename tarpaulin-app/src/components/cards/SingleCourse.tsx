@@ -1,7 +1,7 @@
 import { Box, Button, CloseButton, Container, Image, Popover, PopoverArrow, PopoverBody, PopoverCloseButton, PopoverContent, PopoverFooter, PopoverHeader, PopoverTrigger, Text, chakra, useColorModeValue } from '@chakra-ui/react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { removeCourse } from '../../redux/CourseSlice';
+import { fetchCourses, removeCourse } from '../../redux/CourseSlice';
 import { AppDispatch } from '../../redux/store';
 import { Course } from '../../types';
 import { useNavigate } from 'react-router-dom';
@@ -15,9 +15,11 @@ const SingleCourse = ({ course }: CourseProps) => {
       const dispatch = useDispatch<AppDispatch>();
       const navigate = useNavigate();
 
+
       const handleDelete = (e: React.FormEvent<HTMLButtonElement>) => {
             e.preventDefault();
-            dispatch(removeCourse({ courseId: course._id }));
+            dispatch(removeCourse({ courseId: course._id as string }));
+            
       }
 
       return (

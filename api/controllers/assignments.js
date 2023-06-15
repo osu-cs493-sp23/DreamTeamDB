@@ -50,6 +50,7 @@ router.post("/" , async (req, res, next) => {
       links: {
         getAssignment: `/api/assignments/${insertedAssignment._id}`
       },
+      assignment: insertedAssignment
     });
   }).catch(function (e) {
     res.status(400).json({

@@ -8,16 +8,10 @@ import Login from '../pages/auth/Login'
 import Register from '../pages/auth/Register'
 import Dashboard from '../pages/main/Dashboard'
 import Landing from '../pages/main/Landing'
-import { fetchCourses } from '../redux/CourseSlice'
 import DetailCourse from '../pages/DetailCourse'
+import Roster from '../pages/Roster'
 
-function App() {
-  const dispatch = useDispatch()
-
-  React.useEffect(() => {
-    dispatch(fetchCourses() as any)
-  }, [dispatch])
-  
+function App() {  
   return (
     <>
       <ColorModeSwitcher />
@@ -27,7 +21,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <>
           <Route path="/dashboard" element={<Dashboard />}>
-            {/* {/* <Route path="/dashboard" element={<Content />} /> */}
+            <Route path="/dashboard" element={<Roster />} /> 
             {/* 
             <Route path="/dashboard/courses" element={<Content />} />
             <Route path="/dashboard/submissions" element={<Content  />} />
