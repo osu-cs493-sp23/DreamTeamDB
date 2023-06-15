@@ -11,7 +11,6 @@ import { Assignment, Course, createSubmission, saveSubmissionFile } from "../../
 import upload from "../../middleware/multer.js";
 import { validateRole } from "../../lib/auth.js";
 
-
 /**
  * @route     POST /api/assignments
  * @desc      Create a new assignment
@@ -24,7 +23,7 @@ import { validateRole } from "../../lib/auth.js";
  * @returns   {object}       - error message
  * @returns   {int}         - status code 201, 400, 403
  */
-router.post("/", async (req, res, next) => {
+router.post("/" , async (req, res, next) => {
   const { title, courseId, points, due } = req.body
   const assignment = new Assignment({
     title: title,

@@ -12,12 +12,12 @@ import { fetchCourses } from '../redux/CourseSlice'
 import DetailCourse from '../pages/DetailCourse'
 
 function App() {
-
   const dispatch = useDispatch()
 
   React.useEffect(() => {
     dispatch(fetchCourses() as any)
   }, [dispatch])
+  
   return (
     <>
       <ColorModeSwitcher />
