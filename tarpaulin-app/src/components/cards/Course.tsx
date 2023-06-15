@@ -32,10 +32,10 @@ interface CourseProps {
       instructorId: string;
       term: string;
       _id: string;
-      deleteCourse(e: React.FormEvent<HTMLButtonElement>): void;
+      // deleteCourse(e: React.FormEvent<HTMLButtonElement>): void;
 }
 
-const CourseCard: React.FC<CourseProps> = ({ title, subject, number, instructorId, term, _id, deleteCourse }) => {
+const CourseCard: React.FC<CourseProps> = ({ title, subject, number, instructorId, term, _id } ) => {
       const role = localStorage.getItem('role');
       const { isOpen, onOpen, onClose } = useDisclosure();
       const { isOpen: isOpen2, onOpen: onOpen2, onClose: onClose2 } = useDisclosure();
@@ -57,7 +57,7 @@ const CourseCard: React.FC<CourseProps> = ({ title, subject, number, instructorI
                         overflow="hidden"
                         bg={useColorModeValue('white', 'gray.800')}
                   >
-                        <CloseButton position="absolute" right="8px" top="8px" onClick={deleteCourse} value={_id} key={_id} />
+                        <CloseButton position="absolute" right="8px" top="8px" value={_id} key={_id} />
                         <Image
                               src="https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&auto=format&fit=crop&w=334&q=80"
                               objectFit="cover"
