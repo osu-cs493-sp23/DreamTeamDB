@@ -26,26 +26,61 @@ export const fetchCourses = createAsyncThunk(
       }
 )
 
+interface AddNewCourse {
+      title: string,
+      subject: string,
+      number: string,
+      term: string,
+      instructorId: string,
+}
+
 export const addNewCourse = createAsyncThunk(
       'course/addNewCourse',
-      async (course: Course) => {
+      async ({ title, subject, number, term, instructorId }: AddNewCourse) => {
             const token = localStorage.getItem('token');
-            const response = await axios.post('http://localhost:8000/api/courses', {
-                  course,
-            }, {
-                  headers: { Authorization: `Bearer ${token}` },
-            });
-            const courseToAdd: Course = {
-                  _id: response.data.course.id,
-                  instructorId: response.data.course.instructorId,
-                  subject: response.data.course.subject,
-                  number: response.data.course.number,
-                  title: response.data.course.title,
-                  term: response.data.course.term,
+            try {
+                  const response = await axios.post('http://localhost:8000/api/courses', {
+                        title,
+                        subject,
+                        number,
+                        term,
+                        instructorId,
+                  }, {
+                        headers: { Authorization: `Bearer ${token}` },
+                  });
+                  return response.data.course;
+            } catch (error) {
+                  console.log(error);
+                  return error;
             }
-            return courseToAdd;
       }
 )
+
+interface RemoveCourse {
+      courseId: string,
+}
+
+export const removeCourse = createAsyncThunk(
+      'course/removeCourse',
+      async ({ courseId }: RemoveCourse) => {
+            const token = localStorage.getItem('token');
+            try {
+                  const response = await axios.delete(`http://localhost:8000/api/courses/${courseId}`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                  });
+                  if (response.status === 204) {
+                        return courseId;
+                  } else {
+                        return false;
+                  }
+            } catch (error) {
+                  console.log(error);
+                  return false;
+            }
+      }
+)
+
+
 
 export const courseSlice = createSlice({
       name: 'course',
@@ -71,12 +106,11 @@ export const courseSlice = createSlice({
             });
             builder.addCase(addNewCourse.fulfilled, (state, action) => {
                   state.courses.push(action.payload);
-            });    
-            builder.addCase(addNewCourse.rejected, (state) => {
-                  state.courses = [];
             });
-            builder.addCase(addNewCourse.pending, (state) => {
-                  state.courses = [];
+            builder.addCase(removeCourse.fulfilled, (state, action) => {
+                  if (action.payload) {
+                        state.courses = state.courses.filter(course => course._id !== action.payload);
+                  }
             });
       }
 
@@ -86,5 +120,9 @@ export const courseSlice = createSlice({
 export const { setCourses, deleteCourse } = courseSlice.actions
 
 export const selectCourses = (state: { course: CourseState }) => state.course.courses;
+
+export const selectCourseById = (state: { course: CourseState }, courseId: string) => {
+      return state.course.courses.find(course => course._id === courseId);
+}
 
 export default courseSlice.reducer

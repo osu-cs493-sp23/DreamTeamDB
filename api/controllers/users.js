@@ -93,7 +93,7 @@ router.post("/login", async (req, res, next) => {
 
     const token = generateAuthToken(user);
 
-    res.status(200).json({ token , id: user._id, role: user.role });
+    res.status(200).json({ token, id: user._id, role: user.role });
   } catch (e) {
     next(e);
   }
@@ -146,7 +146,7 @@ router.get(
   }
 );
 
-const getCoursesByInstructor = async (id) => {
+export const getCoursesByInstructor = async (id) => {
   const courses = await Course.find({ instructorId: id }).populate(
     "instructorId",
     "name"
@@ -155,6 +155,7 @@ const getCoursesByInstructor = async (id) => {
   const courseList = courses.map((course) => ({
     id: course._id,
     name: course.name,
+    instructor: course.instructorId.name,
   }));
 
   return courseList;
@@ -163,5 +164,7 @@ const getCoursesByInstructor = async (id) => {
 const getCoursesByStudent = async (id) => {
   return [];
 };
+
+
 
 export default router;

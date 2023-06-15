@@ -12,7 +12,7 @@ export type Course = {
   title: string;
   term: string;
   instructorId: string;
-  _id?: string;
+  _id: string;
 }
 
 export interface Submission {

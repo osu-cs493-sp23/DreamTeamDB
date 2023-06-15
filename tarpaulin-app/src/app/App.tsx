@@ -1,13 +1,15 @@
-import { Routes, Route } from 'react-router-dom'
+import { Flex, IconButton, useColorMode } from '@chakra-ui/react'
+import React from 'react'
+import { BsFillSunFill, BsMoonStarsFill } from 'react-icons/bs'
+import { useDispatch } from 'react-redux'
+import { Route, Routes } from 'react-router-dom'
+import Courses from '../pages/Courses'
 import Login from '../pages/auth/Login'
 import Register from '../pages/auth/Register'
+import Dashboard from '../pages/main/Dashboard'
 import Landing from '../pages/main/Landing'
-import { Flex, IconButton, useColorMode } from '@chakra-ui/react'
-import { BsMoonStarsFill, BsFillSunFill } from 'react-icons/bs'
-import Dashboard, { Content } from '../pages/main/Dashboard'
-import { useDispatch } from 'react-redux'
-import React from 'react'
 import { fetchCourses } from '../redux/CourseSlice'
+import DetailCourse from '../pages/DetailCourse'
 
 function App() {
 
@@ -25,11 +27,14 @@ function App() {
         <Route path="/register" element={<Register />} />
         <>
           <Route path="/dashboard" element={<Dashboard />}>
-            <Route path="/dashboard" element={<Content />} />
+            {/* {/* <Route path="/dashboard" element={<Content />} /> */}
+            {/* 
             <Route path="/dashboard/courses" element={<Content />} />
             <Route path="/dashboard/submissions" element={<Content  />} />
             <Route path="/dashboard/timeline" element={<Content />} />
-            <Route path="/dashboard/admin" element={<Content />} />
+            <Route path="/dashboard/admin" element={<Content />} /> */}
+            <Route path="/dashboard/courses" element={<Courses />} />
+            <Route path="/dashboard/courses/:courseId" element={<DetailCourse />} />
           </Route>
         </>
       </Routes>
