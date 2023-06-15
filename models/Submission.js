@@ -8,7 +8,7 @@ const submissionSchema = new mongoose.Schema({
   },
   studentId: {
     type: mongoose.Schema.Types.ObjectId,
-    required: true,
+    required: false,
   },
   timestamp: {
     type: Date,
@@ -16,9 +16,12 @@ const submissionSchema = new mongoose.Schema({
   },
   grade: {
     type: Number,
+    required: false,
   },
   file: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    required: false,
+    ref: "submissions.files"
   },
 });
 

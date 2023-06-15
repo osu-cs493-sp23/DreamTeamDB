@@ -46,11 +46,6 @@ export const Content: React.FC<ContentProps> = ({ role }) => {
 
       const { courses, setCourses } = useCourses(1, "", "", "");
 
-      // React.useEffect(() => {
-      //       console.log(courses)
-      //       setCoursesList(courses);
-      // }, [courses])
-
       const deleteCourse = async (e: React.FormEvent<HTMLButtonElement>) => {
             const token = localStorage.getItem('token')
             e.preventDefault()
@@ -73,7 +68,6 @@ export const Content: React.FC<ContentProps> = ({ role }) => {
             }
       }
 
-
       if (path === '/submissions') {
             return (
                   <>
@@ -90,7 +84,7 @@ export const Content: React.FC<ContentProps> = ({ role }) => {
                               {courses?.map((course: Course, index) => {
                                     return (
                                           <Box key={index} zIndex={1}>
-                                                <CourseCard key={index} title={course.title} subject={course.subject} number={course.number} term={course.term} instructorId={course.instructorId} _id={course._id} deleteCourse={deleteCourse} />
+                                                <CourseCard key={index} title={course.title} subject={course.subject} number={course.number} term={course.term} instructorId={course.instructorId} _id={course._id as string} deleteCourse={deleteCourse} />
                                           </Box>
                                     )
                               })}
@@ -123,7 +117,7 @@ export const Content: React.FC<ContentProps> = ({ role }) => {
                               {courses?.map((course: Course, index) => {
                                     return (
                                           <Box key={index} zIndex={1}>
-                                                <CourseCard key={index} title={course.title} subject={course.subject} number={course.number} term={course.term} instructorId={course.instructorId} _id={course._id} deleteCourse={deleteCourse} />
+                                                <CourseCard key={index} title={course.title} subject={course.subject} number={course.number} term={course.term} instructorId={course.instructorId} _id={course._id as string} deleteCourse={deleteCourse} />
                                           </Box>
                                     )
                               })}
@@ -134,11 +128,12 @@ export const Content: React.FC<ContentProps> = ({ role }) => {
 
 }
 
-const Dashboard: React.FC = () => {
-      const { user } = useContext(UserContext);
-      const { isOpen, onClose, onOpen } = useDisclosure();
+interface DashboardProps {
+      children?: React.ReactNode;
+}
 
-      const role = user?.role;
+const Dashboard: React.FC<DashboardProps> = ({ children: chlildren }) => {
+      const { isOpen, onClose, onOpen } = useDisclosure();
 
       return (
             <Box as="section" bg={useColorModeValue('gray.50', 'gray.700')} minH="100vh">
@@ -183,6 +178,7 @@ const Dashboard: React.FC = () => {
                         </Flex>
 
                         <Box as="main" p={6} minH="25rem" bg={useColorModeValue('auto', 'gray.800')}>
+                              {/* {chlildren} */}
                               <Outlet />
                         </Box>
                   </Box>

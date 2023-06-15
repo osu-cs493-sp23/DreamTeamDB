@@ -5,10 +5,11 @@ import { Router } from "express";
 const router = Router();
 
 import mongoose from "mongoose";
-
-import { assignmentSchema, submissionSchema}  from "../../lib/validation/schemas.js"
-import { Assignment, Course } from "../../models/index.js";
-
+import joi from "joi";
+import { assignmentSchema, submissionSchema } from "../../lib/validation/schemas.js"
+import { Assignment, Course, createSubmission, saveSubmissionFile } from "../../models/index.js";
+import upload from "../../middleware/multer.js";
+import { validateRole } from "../../lib/auth.js";
 
 /**
  * @route     POST /api/assignments
@@ -22,13 +23,13 @@ import { Assignment, Course } from "../../models/index.js";
  * @returns   {object}       - error message
  * @returns   {int}         - status code 201, 400, 403
  */
-router.post("/" ,async (req, res, next) => {
+router.post("/" , async (req, res, next) => {
   const { title, courseId, points, due } = req.body
   const assignment = new Assignment({
     title: title,
     courseId: new mongoose.Types.ObjectId(courseId),
     points: points,
-    due: due
+    due: Date.parse(due),
   })
 
   // TODO: validate that coursId belongs to a real course
@@ -47,7 +48,7 @@ router.post("/" ,async (req, res, next) => {
     return res.status(201).json({
       id: insertedAssignment._id,
       links: {
-        business: `/api/assignments/${insertedAssignment._id}`
+        getAssignment: `/api/assignments/${insertedAssignment._id}`
       },
     });
   }).catch(function (e) {
@@ -67,7 +68,7 @@ router.post("/" ,async (req, res, next) => {
 * @return {object}    - error message
 * @return {int}       - status code 200, 404
 */
-router.get("/:id",  (req, res, next) => {
+router.get("/:id", (req, res, next) => {
   const assignmentID = new mongoose.Types.ObjectId(req.params.id)
 
   Assignment.findById(assignmentID).then(async (foundAssignment) => {
@@ -181,8 +182,33 @@ router.get("/:id/submissions", (req, res, next) => {
  * @returns   {int}       - status code 201, 400, 403, 404
  * @returns   {object}       - error message
  */
-router.post("/:id/submissions", (req, res, next) => {
-      res.send(`Create a new submission for assignment ${req.params.id}`);
+router.post("/:id/submissions", validateRole(["student"]), upload, async (req, res, next) => {
+  const schema = joi.object({
+    // This is the studentId of the user who is logged in
+    studentId: req.user._id,
+    assignmentId: joi.string().required(),
+    file: joi.string()
+  })
+  const { error } = schema.validate(req.body)
+  if (error) {
+    return res.status(400).json({
+      error: error.details[0].message
+    })
+  }
+
+  const assignmentID = new mongoose.Types.ObjectId(req.body.assignmentId);
+  const studentID = new mongoose.Types.ObjectId(req.body.studentId);
+  const file = req.file
+
+  try {
+    const { fileId, submissionId } = await createSubmission(studentID, assignmentID, file)
+    return res.status(201).json({
+      id: submissionId,
+      fileId: fileId,
+    })
+  } catch (err) {
+    next("err in createSubmission")
+  }
 });
 
 export default router;

@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 const assignmentSchema = new mongoose.Schema({
   courseId: {
     type: mongoose.Schema.Types.ObjectId,
+    ref: "Course",
     required: true,
   },
   title: {
@@ -17,6 +18,11 @@ const assignmentSchema = new mongoose.Schema({
   due: {
     type: Date,
     required: true,
+  },
+  submissions: {
+    type: [mongoose.Schema.Types.ObjectId],
+    default: [],
+    unique: false,
   },
 });
 
