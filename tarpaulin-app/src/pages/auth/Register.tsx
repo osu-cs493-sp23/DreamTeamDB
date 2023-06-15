@@ -165,7 +165,7 @@ const Register = () => {
                               </Select>
                         </FormControl>
                         <Button colorScheme="teal" mt={8} isLoading={loading} onClick={(e) => handleSubmit(e as any)}>
-                              Log In
+                              Register
                         </Button>
                         <Button variant={'link'} size={'sm'} mt={6} onClick={() => navigate('/login')}>
                               Already have an account?
