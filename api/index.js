@@ -5,7 +5,7 @@
  */
 
 import { Router } from "express";
-import { User } from "../models/index.js";
+import { User, Course } from "../models/index.js";
 import assignments from "./controllers/assignments.js";
 import courses from "./controllers/courses.js";
 import users from "./controllers/users.js";
@@ -28,6 +28,21 @@ router.get("/instructors", async (req, res, next) => {
     "name email"
   );
   res.status(200).json(instructors);
+});
+
+router.get("/instructors/:id", async (req, res, next) => {
+  const { id } = req.params;
+  const instructor = await Course.findById(id).select("instructorId");
+  const instructorId = instructor.instructorId;
+  const instructorInfo = await User.findById(instructorId).select(
+    "name email"
+  );
+  const data = {
+    _id: instructorInfo._id,
+    name: instructorInfo.name,
+    email: instructorInfo.email,
+  };
+  res.status(200).json(data);
 });
 
 router.use('*', function (req, res, next) {
