@@ -4,6 +4,7 @@
  */
 
 import mongoose from "mongoose";
+import fs from "fs";
 
 import userSchema from "./User.js";
 import assignmentSchema from "./Assignment.js";
@@ -36,7 +37,11 @@ export async function updateStudentsInCourse(courseId, add, remove) {
       return false;
     }
     if (add) {
-      course.students.addToSet(...add);
+      if (!course.students.map(s => s.toString()).includes(add)) {
+        course.students.concat(add);
+      } else {
+        console.error("  -- error: duplicate student id in add");
+      }
     }
     if (remove) {
       course.students.pull(...remove);
@@ -49,3 +54,68 @@ export async function updateStudentsInCourse(courseId, add, remove) {
   }
 }
 
+export async function createSubmission(studentId, assignmentId, file) {
+  try {
+    const assignment = await Assignment.findById(assignmentId);
+    if (!assignment) {
+      return null;
+    }
+    assignment.submissions.push(studentId);
+    await assignment.save();
+    const submission = new Submission({
+      assignmentId: assignmentId,
+      studentId: studentId,
+      timestamp: Date.now(),
+    });
+    // Yeah, we know.
+    await submission.save();
+    const fileId = await saveSubmissionFile(file, submission._id, studentId, assignmentId);
+    submission.file = fileId;
+    await submission.save();
+    return {
+      submissionId: submission._id,
+      fileId: fileId,
+    }
+  } catch (err) {
+    console.error("  -- error:", err);
+    return null;
+  }
+}
+
+export async function saveSubmissionFile(file, submissionId, studentId, assignmentId) {
+  return new Promise((resolve, reject) => {
+    const db = mongoose.connection.db;
+    const bucket = new mongoose.mongo.GridFSBucket(db, {
+      bucketName: "submissions",
+    });
+    const metadata = {
+      contentType: file.mimetype,
+      submissionId: submissionId,
+      studentId: studentId,
+      assignmentId: assignmentId,
+    };
+    const uploadStream = bucket.openUploadStream(file.filename, { metadata: metadata });
+    const id = uploadStream.id;
+
+    fs.createReadStream(file.path).pipe(uploadStream);
+
+    uploadStream.on("error", function (err) {
+
+      fs.unlink(file.path, function (err) {
+        if (err) {
+          console.error("  -- error:", err);
+        }
+      });
+      reject(err);
+    });
+
+    uploadStream.on("finish", function () {
+      fs.unlink(file.path, function (err) {
+        if (err) {
+          console.error("  -- error:", err);
+        }
+      });
+      resolve(id);
+    });
+  });
+}

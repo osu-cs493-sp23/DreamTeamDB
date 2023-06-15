@@ -36,7 +36,7 @@ const redisClient = redis.createClient({
   port: process.env.REDIS_PORT,
 })
 
-// Create a rate limiter middleware
+// Rate Limiting
 export const limiterUnauthenticated = rateLimit({
   windowMs: 60 * 1000,  // 1 minute
   max: 10,              // for requests made without a valid authentication token, the API permits 10 requests per minute
@@ -61,10 +61,11 @@ export const limiterAuthenticated = rateLimit({
   })
 });
 
+// Redis
 async function connectToRedis() {
   try {
     await redisClient.connect();
-    // console.log("Redis client connected");
+    console.log("[⚡️ REDIS] Connected to RedisClient")
   } catch (err) {
     console.log("Redis error: ", err);
   }
@@ -75,7 +76,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 app.use(cors())
-app.use(rateLimitM)
+// app.use(rateLimitM)
 
 // API
 app.use("/api", api);
@@ -111,9 +112,10 @@ mongoose
     });
   });
 
+// Redis Connection
 connectToRedis()
   .then(() => {
-    console.log(`[⚡️ SERVER] Redis is running on port ${process.env.REDIS_PORT}`);
+    console.log(`[⚡️ REDIS DOCKER] Redis is running on port ${process.env.REDIS_PORT}`);
   })
   .catch((err) => {
     console.log("Error connecting to Redis: ", err);

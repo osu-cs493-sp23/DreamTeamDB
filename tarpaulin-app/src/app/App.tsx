@@ -5,12 +5,17 @@ import Landing from '../pages/main/Landing'
 import { Flex, IconButton, useColorMode } from '@chakra-ui/react'
 import { BsMoonStarsFill, BsFillSunFill } from 'react-icons/bs'
 import Dashboard, { Content } from '../pages/main/Dashboard'
-import { useContext } from 'react'
-import { UserContext } from '../context/UserContext'
+import { useDispatch } from 'react-redux'
+import React from 'react'
+import { fetchCourses } from '../redux/CourseSlice'
 
 function App() {
-  // const { user } = useContext(UserContext);
-  // const role = user?.role;
+
+  const dispatch = useDispatch()
+
+  React.useEffect(() => {
+    dispatch(fetchCourses() as any)
+  }, [dispatch])
   return (
     <>
       <ColorModeSwitcher />
