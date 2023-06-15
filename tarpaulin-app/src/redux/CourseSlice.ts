@@ -80,8 +80,6 @@ export const removeCourse = createAsyncThunk(
       }
 )
 
-
-
 export const courseSlice = createSlice({
       name: 'course',
       initialState,
