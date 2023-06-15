@@ -36,17 +36,14 @@ export async function updateStudentsInCourse(courseId, add, remove) {
     if (!course) {
       return false;
     }
-    if (add) {
-      if (!course.students.map(s => s.toString()).includes(add)) {
-        course.students.concat(add);
-      } else {
-        console.error("  -- error: duplicate student id in add");
-      }
-    }
-    if (remove) {
-      course.students.pull(...remove);
-    }
+    
+    const students = await User.find({ _id: { $in: add } }, { _id: 1 });
+    const studentIds = students.map((student) => student._id);
+
+    course.students = course.students.filter((student) => !remove.includes(student.toString()));
+    course.students.push(...studentIds);
     await course.save();
+
     return true;
   } catch (err) {
     console.error("  -- error:", err);

@@ -49,15 +49,6 @@ const Form = () => {
             }
       }
 
-      // useEffect(() => {
-      //       console.log(add)
-      // }, [add])
-
-      // useEffect(() => {
-      //       console.log(remove)
-      // }, [remove])
-
-
       return students && (
             <Box
                   p={8}
@@ -66,7 +57,6 @@ const Form = () => {
                   borderColor="gray.200"
                   borderRadius={8}
                   boxShadow="lg"
-                  mt="8"
             >
                   <form>
                         <Stack spacing={4}>

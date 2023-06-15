@@ -19,13 +19,10 @@ import {
 import axios from 'axios';
 import React, { useContext } from "react";
 import { AiOutlineHome, AiOutlineTeam } from 'react-icons/ai';
-import { BsCalendarCheck, BsFolder2 } from 'react-icons/bs';
 import { FaBell } from 'react-icons/fa';
 import { FcReading } from 'react-icons/fc';
 import { FiMenu } from 'react-icons/fi';
-import { MdAdminPanelSettings } from "react-icons/md";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { AssignmentCard } from "../../components/cards/Assignment";
 import CourseCard from '../../components/cards/Course';
 import { UserContext } from "../../context/UserContext";
 import useCourses from '../../hooks/useCourses';
@@ -84,7 +81,7 @@ export const Content: React.FC<ContentProps> = ({ role }) => {
                               {courses?.map((course: Course, index) => {
                                     return (
                                           <Box key={index} zIndex={1}>
-                                                <CourseCard key={index} title={course.title} subject={course.subject} number={course.number} term={course.term} instructorId={course.instructorId} _id={course._id as string} deleteCourse={deleteCourse} />
+                                                {/* <CourseCard key={index} title={course.title} subject={course.subject} number={course.number} term={course.term} instructorId={course.instructorId} _id={course._id as string} deleteCourse={deleteCourse} /> */}
                                           </Box>
                                     )
                               })}
@@ -117,7 +114,7 @@ export const Content: React.FC<ContentProps> = ({ role }) => {
                               {courses?.map((course: Course, index) => {
                                     return (
                                           <Box key={index} zIndex={1}>
-                                                <CourseCard key={index} title={course.title} subject={course.subject} number={course.number} term={course.term} instructorId={course.instructorId} _id={course._id as string} deleteCourse={deleteCourse} />
+                                                {/* <CourseCard key={index} title={course.title} subject={course.subject} number={course.number} term={course.term} instructorId={course.instructorId} _id={course._id as string} deleteCourse={deleteCourse} /> */}
                                           </Box>
                                     )
                               })}
@@ -228,12 +225,12 @@ const SidebarContent = ({ ...props }: BoxProps) => {
                               Tarpaulin
                         </Text>
                   </Flex>
-                  <Flex direction="column" as="nav" fontSize="md" color="gray.600" aria-label="Main Navigation" lineHeight={1.5} gap={4}>
+                  <Flex direction="column" as="nav" fontSize="3xl" color="gray.600" aria-label="Main Navigation" lineHeight={1.5} gap={4}>
                         <NavItem onClick={() => navigate('/dashboard')} icon={AiOutlineHome}>Dashboard</NavItem>
                         <NavItem onClick={() => navigate('/dashboard/courses')} icon={AiOutlineTeam}>Course List</NavItem>
-                        <NavItem onClick={() => navigate('/dashboard/submissions')} icon={BsFolder2}>Submissions</NavItem>
-                        <NavItem onClick={() => navigate('/dashboard/timeline')} icon={BsCalendarCheck}>Timeline View</NavItem>
-                        {user?.role === 'admin' && <NavItem onClick={() => navigate('/dashboard/admin')} icon={MdAdminPanelSettings}>Admin</NavItem>}
+                        {/* <NavItem onClick={() => navigate('/dashboard/submissions')} icon={BsFolder2}>Submissions</NavItem> */}
+                        {/* <NavItem onClick={() => navigate('/dashboard/timeline')} icon={BsCalendarCheck}>Timeline View</NavItem> */}
+                        {/* {user?.role === 'admin' && <NavItem onClick={() => navigate('/dashboard/admin')} icon={MdAdminPanelSettings}>Admin</NavItem>} */}
                         <NavItem onClick={handleLogout} icon={AiOutlineHome}>Logout</NavItem>
                   </Flex>
             </Box>

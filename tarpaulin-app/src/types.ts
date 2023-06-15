@@ -13,6 +13,8 @@ export type Course = {
   term: string;
   instructorId: string;
   _id?: string;
+  assignments?: Assignment[];
+  students?: User[];
 }
 
 export interface Submission {
