@@ -10,6 +10,7 @@ import { assignmentSchema, submissionSchema } from "../../lib/validation/schemas
 import { Assignment, Course, createSubmission, saveSubmissionFile } from "../../models/index.js";
 import upload from "../../middleware/multer.js";
 import { validateRole } from "../../lib/auth.js";
+import { getAllSubmissionsForAssignment, getSubmissionForAssignment } from "../../models/Assignment.js";
 
 /**
  * @route     POST /api/assignments
@@ -153,22 +154,6 @@ router.delete("/:id", (req, res, next) => {
 });
 
 /**
- * @route     GET /api/assignments/{id}/submissions
- * @desc      Fetch all submissions for a specific assignment
- * @param     {ObjectId} id - ObjectId of the assignment
- * @param     {int} page - page number (optional)
- * @param     {ObjectId} studentId - ObjectId of the student (optional)
- * @access    instructor, admin
- * @returns   {object - Submissions[]} - array of submissions
- * @returns   {int}       - status code 200, 403, 404
- * @returns   {object}       - error message
- * @paginated
- */
-router.get("/:id/submissions", (req, res, next) => {
-  res.send(`Get submissions for assignment ${req.params.id}`);
-});
-
-/**
  * @route     POST /api/assignments/{id}/submissions
  * @desc      Create a new submission for a specific assignment
  * @param    {ObjectId} id - ObjectId of the assignment
@@ -209,6 +194,60 @@ router.post("/:id/submissions", validateRole(["student"]), upload, async (req, r
     })
   } catch (err) {
     next("err in createSubmission")
+  }
+});
+
+/**
+ * @route     GET /api/assignments/{id}/submissions
+ * @desc      Fetch the list of all Submissions for an Assignment.
+ * @param     {ObjectId} id - ObjectId of the Assignment
+ * @access    Only an authenticated User with 'admin' role or an authenticated 'instructor'
+ * @returns   {object Submission[]}    - array of submission objects
+ * @returns   {object}    - error message
+ * @returns   {int}       - status code 200, 404
+ */
+router.get("/:id/submissions", async (req, res, next) => {
+
+  // const schema = joi.object({
+  //   assignmentId: req.assignment._id
+  // })
+
+  // const { error } = schema.validate(req.body)
+  // if (error) {
+  //   return res.status(400).json({
+  //     error: error.details[0].message
+  //   })
+  // }
+
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return next("Invalid ID");
+  }
+  const assignmentID = new mongoose.Types.ObjectId(id)
+  let page = req.body.page || 1; // Use 1 as the default value if page is not provided
+
+  if (isNaN(page) || !Number.isInteger(page)) {
+    page = 1;                     // Set default value if page is not a valid integer
+  }
+  
+  //Fetch a submission only for the specified student ID.
+  if (req.body.studentId) {
+    if (!mongoose.Types.ObjectId.isValid(req.body.studentId)) {
+      return next("Invalid ID");
+    }
+    const studentId = new mongoose.Types.ObjectId(req.body.studentId)
+    const submission = await getSubmissionForAssignment(assignmentID, studentId, page)
+    if (!submission) {
+      return next("Error fetching submission.");
+    }
+    res.status(200).json({ submission });
+  } else {            //Fetch all submissions only for the specified student ID.
+    const submissions = await getAllSubmissionsForAssignment(assignmentID, page);
+
+    if (!submissions) {
+      return next("Error fetching submissions.");
+    }
+    res.status(200).json({ submissions });
   }
 });
 
