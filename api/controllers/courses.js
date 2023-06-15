@@ -59,8 +59,9 @@ router.post("/", validateRole(["admin"]), requireValidation(courseSchema), async
   res.status(201).json({
     id,
     links: {
-      course: `/api/courses/${id}`
-    }
+      getCourse: `/api/courses/${id}`
+    },
+    course: req.body
   });
 });
 

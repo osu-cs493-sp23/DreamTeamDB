@@ -13,6 +13,7 @@
     "@chakra-ui/react": "^2.7.0",
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
+    "@reduxjs/toolkit": "^1.9.5",
     "axios": "^1.4.0",
     "bson-objectid": "^2.0.4",
     "framer-motion": "^10.12.16",
@@ -20,6 +21,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.9.0",
+    "react-redux": "^8.1.0",
     "react-router-dom": "^6.11.2"
   },
   "devDependencies": {

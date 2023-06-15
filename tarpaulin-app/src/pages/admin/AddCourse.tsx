@@ -1,6 +1,9 @@
 import { Box, Button, Flex, FormControl, FormLabel, Input, Text } from '@chakra-ui/react'
-import axios from 'axios'
 import React from 'react'
+import { addNewCourse } from '../../redux/CourseSlice'
+import { AppDispatch } from '../../redux/store';
+import { Course } from '../../types';
+import { useDispatch } from 'react-redux';
 
 const AddCourse = () => {
       return (
@@ -18,32 +21,45 @@ const Form = () => {
       const [term, setTerm] = React.useState<string>('')
       const [status, setStatus] = React.useState<string>('')
 
+      const dispatch = useDispatch<AppDispatch>()
+
+
       const handleSubmit = async (e: React.FormEvent<HTMLButtonElement>) => {
-            const token = localStorage.getItem('token')
             e.preventDefault()
 
-            try {
-                  const response = await axios.post('http://localhost:8000/api/courses', {
-                        title,
-                        subject,
-                        number,
-                        instructorId,
-                        term
-                  }, {
-                        headers: {
-                              Authorization: `Bearer ${token}`
-                        }
-                  })
-
-                  if (response.status === 201) {
-                        setStatus('Course Added!')
-                  } else {
-                        setStatus('Course Not Added!')
-                  }
-
-            } catch (error) {
-                  setStatus('Error Adding Course!')
+            const courseToAdd: Course = {
+                  title,
+                  subject,
+                  number,
+                  instructorId,
+                  term
             }
+
+            dispatch(addNewCourse(courseToAdd))
+
+
+            // try {
+            //       const response = await axios.post('http://localhost:8000/api/courses', {
+            //             title,
+            //             subject,
+            //             number,
+            //             instructorId,
+            //             term
+            //       }, {
+            //             headers: {
+            //                   Authorization: `Bearer ${token}`
+            //             }
+            //       })
+
+            //       if (response.status === 201) {
+            //             setStatus('Course Added!')
+            //       } else {
+            //             setStatus('Course Not Added!')
+            //       }
+
+            // } catch (error) {
+            //       setStatus('Error Adding Course!')
+            // }
 
       }
 
